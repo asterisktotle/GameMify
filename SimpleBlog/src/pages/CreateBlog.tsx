@@ -21,22 +21,25 @@ const CreateBlog = () => {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
-		const {
-			data: { user },
-		} = await supabase.auth.getUser();
 
-		if (!user) {
-			console.log('User is not authenticated');
-			setIsLoading(false);
-			return;
-		}
+		// TODO: create getUser authentication login and signup
+
+		// const {
+		// 	data: { user },
+		// } = await supabase.auth.getUser();
+
+		// if (!user) {
+		// 	console.log('User is not authenticated');
+		// 	setIsLoading(false);
+		// 	return;
+		// }
 
 		const newBlogData = {
 			title: blogFormData.title,
 			content: blogFormData.content,
 			excerpt: blogFormData.excerpt,
 			published: true,
-			author_id: user.id,
+			// author_id: userId,
 		};
 
 		const { data, error } = await supabase
@@ -46,7 +49,11 @@ const CreateBlog = () => {
 			.single();
 
 		if (error) {
-			console.log('Error adding new blog post');
+			console.error(
+				'Error adding new blog post: ',
+				error.message,
+				error.details
+			);
 			setIsLoading(false);
 		} else {
 			console.log('Blog created successfully', data);
