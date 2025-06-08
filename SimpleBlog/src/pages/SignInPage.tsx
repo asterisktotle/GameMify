@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 // import { useAppDispatch, useAppSelector } from "../hooks/redux"
 // import { loginUser, clearError } from "../store/authSlice"
 
-const LoginPage: React.FC = () => {
+const SignInPage: React.FC = () => {
 	//   const dispatch = useAppDispatch()
 	// const navigate = useNavigate();
 	//   const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth)
@@ -126,4 +126,4 @@ const LoginPage: React.FC = () => {
 	);
 };
 
-export default LoginPage;
+export default SignInPage;
