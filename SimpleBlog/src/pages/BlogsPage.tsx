@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabase-client';
 import { Link } from 'react-router-dom';
+import type { BlogTypes } from '../types/Interfaces';
 
 const BlogsPage = () => {
-	const [blogs, setBlogs] = useState([]);
+	const [blogs, setBlogs] = useState<BlogTypes[]>([]);
 	const [isAuthenticated, setIsAuthenticated] = useState(true);
 
 	const fetchBlogs = async () => {
@@ -17,7 +18,7 @@ const BlogsPage = () => {
 	};
 
 	const handleDelete = async (id: number) => {
-		const { data, error } = await supabase.from('Blogs').delete().eq('id', id);
+		const { error } = await supabase.from('Blogs').delete().eq('id', id);
 
 		if (error) {
 			console.log('cannot delete: ', error.message);
@@ -28,10 +29,6 @@ const BlogsPage = () => {
 
 	useEffect(() => {
 		fetchBlogs();
-	}, [blogs]);
-
-	useEffect(() => {
-		console.log('Blogs state updated: ', blogs);
 	}, [blogs]);
 
 	return (
@@ -58,37 +55,39 @@ const BlogsPage = () => {
 			</div>
 
 			<div className="mt-8 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-				{blogs.map((blog) => (
+				{blogs.map((post) => (
 					<div
-						key={blog.id}
+						key={post.id}
 						className="bg-white overflow-hidden shadow rounded-lg"
 					>
 						<div className="px-4 py-5 sm:p-6">
 							<div className="flex items-center justify-between">
 								<h3 className="text-lg font-medium text-gray-900 truncate">
-									{blog.title}
+									<Link to={`/blogs/${post.id}`} state={{ currentBlog: post }}>
+										{post.title}
+									</Link>
 								</h3>
 							</div>
 							<p className="mt-2 text-sm text-gray-600 line-clamp-3">
-								{blog.excerpt}
+								{post.excerpt}
 							</p>
 
 							<div className="mt-4 flex items-center justify-between text-sm text-gray-500">
 								<div>
-									<p>By {blog.author}</p>
-									<p>{new Date(blog.created_at).toLocaleDateString()}</p>
+									<p>By {post.author}</p>
+									<p>{new Date(post.created_at).toLocaleDateString()}</p>
 								</div>
 								{isAuthenticated && (
 									<div className="flex space-x-2">
 										<Link
-											to={`/blogs/edit/${blog.id}`}
-											state={{ blog }}
+											to={`/blogs/edit/${post.id}`}
+											state={{ currentBlog: post }}
 											className="text-blue-600 hover:text-blue-900"
 										>
 											Edit
 										</Link>
 										<button
-											onClick={() => handleDelete(blog.id)}
+											onClick={() => handleDelete(post.id)}
 											className="text-red-600 hover:text-red-900"
 										>
 											Delete

@@ -30,11 +30,9 @@ const EditBlog: React.FC = () => {
 		excerpt: false,
 	});
 
-	const [loading, setLoading] = useState(true);
-
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { id } = useParams<{ id: string }>(); // get the dynamic parameter
+	const { id } = useParams(); // get the dynamic parameter
 
 	const fetchBlog = async (id: string) => {
 		try {
@@ -58,15 +56,16 @@ const EditBlog: React.FC = () => {
 
 	useEffect(() => {
 		const loadBlogContent = async () => {
-			const blogContent = location.state?.blog;
+			const blogContent = location.state?.currentBlog;
 
-			if (blogContent && blogContent.id === id) {
+			if (blogContent && blogContent.id == id) {
 				setBlogForm({
 					title: blogContent.title,
 					excerpt: blogContent.excerpt,
 					content: blogContent.content,
 				});
-				setLoading(false);
+				setIsLoading(false);
+				console.log('location state triggered: ', location.state.currentBlog);
 				return;
 			}
 
@@ -79,8 +78,10 @@ const EditBlog: React.FC = () => {
 						excerpt: blogData.excerpt,
 						content: blogData.content,
 					});
+
+					console.log('location state did not triggered');
 				}
-				setLoading(false);
+				setIsLoading(false);
 			}
 		};
 
@@ -144,7 +145,7 @@ const EditBlog: React.FC = () => {
 				excerpt: false,
 			});
 
-			const { data, error } = await supabase
+			const { error } = await supabase
 				.from('Blogs')
 				.update({
 					title: blogForm.title.trim(),
@@ -163,6 +164,7 @@ const EditBlog: React.FC = () => {
 			console.error('Unexpected error in updating: ', error);
 		} finally {
 			setUpdating(false);
+			navigate('/');
 		}
 	};
 
@@ -178,6 +180,14 @@ const EditBlog: React.FC = () => {
 		return (
 			<div className="flex justify-center items-center h-64">
 				<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+			</div>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<div className="flex justify-center items-center h-64">
+				<div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
 			</div>
 		);
 	}

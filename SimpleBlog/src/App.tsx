@@ -11,6 +11,7 @@ import CreateBlog from './pages/CreateBlog';
 import EditBlog from './pages/EditBlog';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import ViewBlog from './pages/ViewBlog';
 
 function App() {
 	return (
@@ -44,6 +45,8 @@ function App() {
 								<CreateBlog />
 							}
 						/>
+
+						<Route path="/blogs/:id" element={<ViewBlog />} />
 
 						{/* Default redirect */}
 						<Route path="/" element={<Navigate to="/blogs" replace />} />
