@@ -15,7 +15,7 @@ const SignUpPage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const [formData, setFormData] = useState({
-		name: '',
+		username: '',
 		email: '',
 		password: '',
 		confirmPassword: '',
@@ -69,7 +69,7 @@ const SignUpPage: React.FC = () => {
 								htmlFor="name"
 								className="block text-sm font-medium text-gray-700"
 							>
-								Full Name
+								Username
 							</label>
 							<input
 								id="name"
@@ -79,7 +79,7 @@ const SignUpPage: React.FC = () => {
 								value={formData.name}
 								onChange={handleChange}
 								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-								placeholder="Enter your full name"
+								placeholder="Enter your username"
 							/>
 						</div>
 						<div>

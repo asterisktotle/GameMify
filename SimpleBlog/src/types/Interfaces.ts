@@ -1,3 +1,5 @@
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+
 export interface BlogTypes {
 	id: number;
 	title: string;
@@ -6,4 +8,30 @@ export interface BlogTypes {
 	author: string;
 	created_at: string;
 	updated_at?: string;
+}
+
+export interface User {
+	id: string;
+	email: string;
+	created_at: string;
+}
+
+export interface AuthState {
+	user: SupabaseUser | null;
+	session: Session | null;
+	loading: boolean;
+	error: string | null;
+	isAuthenticated: boolean;
+}
+
+export interface SignUpCredentials {
+	email: string;
+	password: string;
+	confirmPassword: string;
+	username: string;
+}
+
+export interface SignInCredentials {
+	email: string;
+	password: string;
 }
