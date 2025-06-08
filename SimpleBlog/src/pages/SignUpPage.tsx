@@ -3,16 +3,18 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// import { useAppDispatch, useAppSelector } from "../hooks/redux"
+import { useAppDispatch, useAppSelector } from '../store/hookType';
+import { clearError, signIn, signUp } from '../store/authSlice';
+import { useDispatch } from 'react-redux';
 // import { registerUser, clearError } from "../store/authSlice"
 
 const SignUpPage: React.FC = () => {
-	//   const dispatch = useAppDispatch()
-	//   const navigate = useNavigate()
-	//   const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth)
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
 
-	// REMOVE THIS FOR TEMPORARY ONLY
-	const [isLoading, setIsLoading] = useState(false);
+	const { isLoading, error, isAuthenticated } = useAppSelector(
+		(state) => state.auth
+	);
 
 	const [formData, setFormData] = useState({
 		username: '',
@@ -21,17 +23,18 @@ const SignUpPage: React.FC = () => {
 		confirmPassword: '',
 	});
 
-	//   useEffect(() => {
-	//     if (isAuthenticated) {
-	//       navigate("/")
-	//     }
-	//   }, [isAuthenticated, navigate])
+	//TODO: CHECK THE VERIFICATION FOR USER
+	useEffect(() => {
+		if (isAuthenticated) {
+			navigate('/');
+		}
+	}, [isAuthenticated, navigate]);
 
-	//   useEffect(() => {
-	//     return () => {
-	//       dispatch(clearError())
-	//     }
-	//   }, [dispatch])
+	useEffect(() => {
+		return () => {
+			dispatch(clearError());
+		};
+	}, [dispatch]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({
@@ -40,10 +43,13 @@ const SignUpPage: React.FC = () => {
 		});
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// dispatch(registerUser(formData));
-		console.log('Sign up clicked');
+		const signingUp = await dispatch(signUp(formData));
+
+		if (signUp.fulfilled.match(signingUp)) {
+			navigate('/');
+		}
 	};
 
 	return (
@@ -58,25 +64,25 @@ const SignUpPage: React.FC = () => {
 					</p>
 				</div>
 				<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-					{/* {error && (
+					{error && (
 						<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
 							{error}
 						</div>
-					)} */}
+					)}
 					<div className="space-y-4">
 						<div>
 							<label
-								htmlFor="name"
+								htmlFor="username"
 								className="block text-sm font-medium text-gray-700"
 							>
 								Username
 							</label>
 							<input
-								id="name"
-								name="name"
+								id="username"
+								name="username"
 								type="text"
 								required
-								value={formData.name}
+								value={formData.username}
 								onChange={handleChange}
 								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 								placeholder="Enter your username"
@@ -151,12 +157,12 @@ const SignUpPage: React.FC = () => {
 					<div className="text-center">
 						<span className="text-sm text-gray-600">
 							Already have an account? {/* MAKE THIS A LINK */}
-							<p
-								// to="/login"
+							<Link
+								to="/signin"
 								className="font-medium text-blue-600 hover:text-blue-500"
 							>
 								Sign in
-							</p>
+							</Link>
 						</span>
 					</div>
 				</form>

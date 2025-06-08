@@ -166,7 +166,7 @@ export const verifyUser = createAsyncThunk(
 const initialState: AuthState = {
 	user: null,
 	session: null,
-	loading: false,
+	isLoading: false,
 	error: null,
 	isAuthenticated: false,
 };
@@ -201,18 +201,18 @@ const authSlice = createSlice({
 		//Handle sign in
 		builder
 			.addCase(signIn.pending, (state) => {
-				state.loading = true;
+				state.isLoading = true;
 				state.error = null;
 			})
 			.addCase(signIn.fulfilled, (state, action) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.user = action.payload?.user ?? null;
 				state.session = action.payload?.session ?? null;
 				state.isAuthenticated =
 					!!action.payload?.user && !!action.payload?.session;
 			})
 			.addCase(signIn.rejected, (state, action) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.error = action.payload as string;
 			});
 
@@ -220,50 +220,50 @@ const authSlice = createSlice({
 
 		builder
 			.addCase(signUp.pending, (state) => {
-				state.loading = true;
+				state.isLoading = true;
 				state.error = null;
 			})
 			.addCase(signUp.fulfilled, (state, action) => {
 				state.error = null;
-				state.loading = false;
+				state.isLoading = false;
 				state.user = action.payload.user;
 				state.isAuthenticated =
 					!!action.payload.user && !!action.payload.session;
 			})
 			.addCase(signUp.rejected, (state, action) => {
 				state.error = action.payload as string;
-				state.loading = false;
+				state.isLoading = false;
 			});
 
 		builder
 			.addCase(signOut.pending, (state) => {
-				state.loading = true;
+				state.isLoading = true;
 			})
 			.addCase(signOut.fulfilled, (state) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.user = null;
 				state.isAuthenticated = false;
 				state.session = null;
 			})
 			.addCase(signOut.rejected, (state, action) => {
 				state.error = action.payload as string;
-				state.loading = false;
+				state.isLoading = false;
 			});
 
 		// Check Authentication
 		builder
 			.addCase(checkAuth.pending, (state) => {
-				state.loading = true;
+				state.isLoading = true;
 			})
 			.addCase(checkAuth.fulfilled, (state, action) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.user = action.payload.user;
 				state.session = action.payload.session;
 				state.isAuthenticated =
 					!!action.payload.user && !!action.payload.session;
 			})
 			.addCase(checkAuth.rejected, (state) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.user = null;
 				state.session = null;
 				state.isAuthenticated = false;
@@ -272,26 +272,26 @@ const authSlice = createSlice({
 		// Refresh Session
 		builder
 			.addCase(refreshSession.pending, (state) => {
-				state.loading = true;
+				state.isLoading = true;
 			})
 			.addCase(refreshSession.fulfilled, (state, action) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.user = action.payload.user;
 				state.session = action.payload.session;
 				state.isAuthenticated =
 					!!action.payload.user && !!action.payload.session;
 			})
 			.addCase(refreshSession.rejected, (state, action) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.error = action.payload as string;
 			});
 
 		builder
 			.addCase(verifyUser.pending, (state) => {
-				state.loading = true;
+				state.isLoading = true;
 			})
 			.addCase(verifyUser.fulfilled, (state, action) => {
-				state.loading = false;
+				state.isLoading = false;
 				// Only update user, keep existing session
 				if (action.payload) {
 					state.user = action.payload;
@@ -304,7 +304,7 @@ const authSlice = createSlice({
 				}
 			})
 			.addCase(verifyUser.rejected, (state, action) => {
-				state.loading = false;
+				state.isLoading = false;
 				state.error = action.payload as string;
 				// Clear auth state on verification failure
 				state.user = null;
@@ -313,3 +313,6 @@ const authSlice = createSlice({
 			});
 	},
 });
+
+export const { clearAuth, clearError, setAuthData } = authSlice.actions;
+export default authSlice.reducer;
