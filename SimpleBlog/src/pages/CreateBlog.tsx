@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { supabase } from '../supabase-client';
+import { useNavigate } from 'react-router-dom';
 
 interface BlogFormData {
 	title: string;
@@ -17,6 +18,7 @@ const CreateBlog = () => {
 		published: false,
 	});
 	const [isLoading, setIsLoading] = useState(false);
+	const navigate = useNavigate();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -149,8 +151,7 @@ const CreateBlog = () => {
 					<div className="flex justify-end space-x-3">
 						<button
 							type="button"
-							// onClick={() => navigate('/')}
-							onClick={() => console.log('Cancel button clicked')}
+							onClick={() => navigate('/')}
 							className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 						>
 							Cancel

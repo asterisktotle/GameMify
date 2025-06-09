@@ -3,24 +3,30 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// import { useAppDispatch, useAppSelector } from "../hooks/redux"
-// import { loginUser, clearError } from "../store/authSlice"
+import { useAppDispatch, useAppSelector } from '../store/hookType';
+import { IoEye, IoEyeOff } from 'react-icons/io5';
+
+import { clearError, signIn } from '../store/authSlice';
 
 const SignInPage: React.FC = () => {
-	//   const dispatch = useAppDispatch()
-	// const navigate = useNavigate();
-	//   const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth)
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
 
-	//TODO
-	// Authentication, isLoading
-	// REMOVE THIS FOR REFACTORING
-	const [isLoading, setIsLoading] = useState(false);
+	const { error, session, user, isLoading, isAuthenticated } = useAppSelector(
+		(state) => state.auth
+	);
 
 	const [formData, setFormData] = useState({
 		email: '',
 		password: '',
 	});
+	const [showPassword, setShowPassword] = useState(false);
 
+	useEffect(() => {
+		return () => {
+			dispatch(clearError());
+		};
+	}, [dispatch]);
 	//   useEffect(() => {
 	//     if (isAuthenticated) {
 	//       navigate("/")
@@ -40,10 +46,17 @@ const SignInPage: React.FC = () => {
 		});
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		console.log('clicked handle submit:', e.target);
-		// dispatch(loginUser(formData))
+
+		const signInAction = await dispatch(signIn(formData));
+
+		if (signIn.fulfilled.match(signInAction)) {
+			navigate('/');
+		} else {
+			window.Error('Cannot signin');
+			console.log('Cannot sign in');
+		}
 	};
 
 	return (
@@ -55,11 +68,11 @@ const SignInPage: React.FC = () => {
 					</h2>
 				</div>
 				<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-					{/* {error && (
+					{error && (
 						<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
 							{error}
 						</div>
-					)} */}
+					)}
 					<div className="space-y-4">
 						<div>
 							<label
@@ -86,16 +99,25 @@ const SignInPage: React.FC = () => {
 							>
 								Password
 							</label>
-							<input
-								id="password"
-								name="password"
-								type="password"
-								required
-								value={formData.password}
-								onChange={handleChange}
-								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-								placeholder="Enter your password"
-							/>
+							<div className="relative flex items-center">
+								<input
+									id="password"
+									name="password"
+									type={showPassword ? 'text' : 'password'}
+									required
+									value={formData.password}
+									onChange={handleChange}
+									placeholder="Enter your password"
+									className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword((prev) => !prev)}
+									className="absolute bottom-2 top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+								>
+									{showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
+								</button>
+							</div>
 						</div>
 					</div>
 
@@ -111,7 +133,7 @@ const SignInPage: React.FC = () => {
 
 					<div className="text-center">
 						<span className="text-sm text-gray-600">
-							Don't have an account? {/* MAKE THIS A LINK */}
+							Don't have an account?
 							<Link
 								to="/signup"
 								className="font-medium text-blue-600 hover:text-blue-500"

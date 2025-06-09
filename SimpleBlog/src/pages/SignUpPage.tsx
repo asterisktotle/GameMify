@@ -4,8 +4,8 @@ import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hookType';
-import { clearError, signIn, signUp } from '../store/authSlice';
-import { useDispatch } from 'react-redux';
+import { clearError, signUp } from '../store/authSlice';
+import { IoEye, IoEyeOff } from 'react-icons/io5';
 // import { registerUser, clearError } from "../store/authSlice"
 
 const SignUpPage: React.FC = () => {
@@ -22,6 +22,9 @@ const SignUpPage: React.FC = () => {
 		password: '',
 		confirmPassword: '',
 	});
+
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 	//TODO: CHECK THE VERIFICATION FOR USER
 	useEffect(() => {
@@ -113,16 +116,25 @@ const SignUpPage: React.FC = () => {
 							>
 								Password
 							</label>
-							<input
-								id="password"
-								name="password"
-								type="password"
-								required
-								value={formData.password}
-								onChange={handleChange}
-								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-								placeholder="Enter your password"
-							/>
+							<div className="relative flex items-center">
+								<input
+									id="password"
+									name="password"
+									type={showPassword ? 'text' : 'password'}
+									required
+									value={formData.password}
+									onChange={handleChange}
+									placeholder="Enter your password"
+									className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword((prev) => !prev)}
+									className="absolute bottom-2 top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+								>
+									{showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
+								</button>
+							</div>
 						</div>
 						<div>
 							<label
@@ -131,16 +143,29 @@ const SignUpPage: React.FC = () => {
 							>
 								Confirm Password
 							</label>
-							<input
-								id="confirmPassword"
-								name="confirmPassword"
-								type="password"
-								required
-								value={formData.confirmPassword}
-								onChange={handleChange}
-								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-								placeholder="Confirm your password"
-							/>
+							<div className="relative flex items-center">
+								<input
+									id="confirmPassword"
+									name="confirmPassword"
+									type={showConfirmPassword ? 'text' : 'password'}
+									required
+									value={formData.confirmPassword}
+									onChange={handleChange}
+									placeholder="Enter your password"
+									className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowConfirmPassword((prev) => !prev)}
+									className="absolute bottom-2 top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+								>
+									{showConfirmPassword ? (
+										<IoEyeOff size={20} />
+									) : (
+										<IoEye size={20} />
+									)}
+								</button>
+							</div>
 						</div>
 					</div>
 

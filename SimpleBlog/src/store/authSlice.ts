@@ -29,6 +29,15 @@ export const signUp = createAsyncThunk(
 				},
 			});
 
+			if (
+				error?.message ===
+				'Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789, !@#$%^&*()_+-=[]{};\':"|<>?,./`~.'
+			) {
+				return rejectWithValue(
+					'Use symbols, and at least one uppercase, lowercase letter and number'
+				);
+			}
+
 			if (error) {
 				return rejectWithValue(error.message);
 			}
