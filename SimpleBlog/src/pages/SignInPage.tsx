@@ -12,7 +12,7 @@ const SignInPage: React.FC = () => {
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 
-	const { error, session, user, isLoading, isAuthenticated } = useAppSelector(
+	const { error, user, isLoading, isAuthenticated } = useAppSelector(
 		(state) => state.auth
 	);
 

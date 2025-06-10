@@ -18,7 +18,7 @@ export interface User {
 
 export interface AuthState {
 	user: SupabaseUser | null;
-	session: Session | null;
+	isInitialized: boolean;
 	isLoading: boolean;
 	error: string | null;
 	isAuthenticated: boolean;

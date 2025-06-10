@@ -15,16 +15,16 @@ export const signUp = createAsyncThunk(
 	'auth/signUp',
 	async (credentials: SignUpCredentials, { rejectWithValue }) => {
 		try {
-			if (credentials.password !== credentials.confirmPassword) {
+			if (credentials.password.trim() !== credentials.confirmPassword.trim()) {
 				return rejectWithValue('Password do not match');
 			}
 
 			const { data, error } = await supabase.auth.signUp({
 				email: credentials.email,
-				password: credentials.password,
+				password: credentials.password.trim(),
 				options: {
 					data: {
-						username: credentials.username,
+						username: credentials.username.trim(),
 					},
 				},
 			});
@@ -44,7 +44,6 @@ export const signUp = createAsyncThunk(
 
 			return {
 				user: data.user,
-				session: data.session,
 			};
 		} catch (error) {
 			return rejectWithValue('Sign Up Failed');
@@ -58,7 +57,7 @@ export const signIn = createAsyncThunk(
 		try {
 			const { data, error } = await supabase.auth.signInWithPassword({
 				email: credentials.email,
-				password: credentials.password,
+				password: credentials.password.trim(),
 			});
 
 			if (error) {
@@ -66,10 +65,9 @@ export const signIn = createAsyncThunk(
 			}
 			return {
 				user: data.user,
-				session: data.session,
 			};
 		} catch (error) {
-			rejectWithValue(`Sign in failed: ${error}`);
+			return rejectWithValue(`Sign in failed: ${error}`);
 		}
 	}
 );
@@ -108,23 +106,23 @@ export const checkAuth = createAsyncThunk(
 			}
 
 			// If user exists, get the session safely
-			let session = null;
+			// let session = null;
 			if (user) {
 				const {
-					data: { session: currentSession },
+					// data: { session: currentSession },
 					error: sessionError,
 				} = await supabase.auth.getSession();
 				if (!sessionError) {
-					session = currentSession;
+					// session = currentSession;
 				}
 			}
 
 			return {
 				user: user,
-				session: session,
+				// session: session,
 			};
 		} catch (error) {
-			return rejectWithValue('Auth check failed');
+			return rejectWithValue(`Auth check failed : ${error}`);
 		}
 	}
 );
@@ -142,10 +140,9 @@ export const refreshSession = createAsyncThunk(
 
 			return {
 				user: data.user,
-				session: data.session,
 			};
 		} catch (error) {
-			return rejectWithValue('Session refresh failed');
+			return rejectWithValue(`Session refresh failed: ${error}`);
 		}
 	}
 );
@@ -165,7 +162,9 @@ export const verifyUser = createAsyncThunk(
 				return rejectWithValue(error.message);
 			}
 
-			return user;
+			return {
+				user: user,
+			};
 		} catch (error) {
 			return rejectWithValue('User verification failed');
 		}
@@ -174,7 +173,7 @@ export const verifyUser = createAsyncThunk(
 
 const initialState: AuthState = {
 	user: null,
-	session: null,
+	isInitialized: false,
 	isLoading: false,
 	error: null,
 	isAuthenticated: false,
@@ -193,16 +192,16 @@ const authSlice = createSlice({
 			state,
 			action: PayloadAction<{
 				user: SupabaseUser | null;
-				session: Session | null;
+				// session: Session | null;
 			}>
 		) => {
 			state.user = action.payload.user;
-			state.session = action.payload.session;
+			// state.session = action.payload.session;
 			state.isAuthenticated = !!action.payload.user && !!action.payload.session;
 		},
 		clearAuth: (state) => {
 			state.user = null;
-			state.session = null;
+			// state.session = null;
 			state.isAuthenticated = false;
 		},
 	},
@@ -216,9 +215,8 @@ const authSlice = createSlice({
 			.addCase(signIn.fulfilled, (state, action) => {
 				state.isLoading = false;
 				state.user = action.payload?.user ?? null;
-				state.session = action.payload?.session ?? null;
-				state.isAuthenticated =
-					!!action.payload?.user && !!action.payload?.session;
+				// state.session = action.payload?.session ?? null;
+				state.isAuthenticated = true;
 			})
 			.addCase(signIn.rejected, (state, action) => {
 				state.isLoading = false;
@@ -236,8 +234,7 @@ const authSlice = createSlice({
 				state.error = null;
 				state.isLoading = false;
 				state.user = action.payload.user;
-				state.isAuthenticated =
-					!!action.payload.user && !!action.payload.session;
+				state.isAuthenticated = true;
 			})
 			.addCase(signUp.rejected, (state, action) => {
 				state.error = action.payload as string;
@@ -252,7 +249,7 @@ const authSlice = createSlice({
 				state.isLoading = false;
 				state.user = null;
 				state.isAuthenticated = false;
-				state.session = null;
+				// state.session = null;
 			})
 			.addCase(signOut.rejected, (state, action) => {
 				state.error = action.payload as string;
@@ -267,14 +264,13 @@ const authSlice = createSlice({
 			.addCase(checkAuth.fulfilled, (state, action) => {
 				state.isLoading = false;
 				state.user = action.payload.user;
-				state.session = action.payload.session;
-				state.isAuthenticated =
-					!!action.payload.user && !!action.payload.session;
+				// state.session = action.payload.session;
+				state.isAuthenticated = true;
 			})
 			.addCase(checkAuth.rejected, (state) => {
 				state.isLoading = false;
 				state.user = null;
-				state.session = null;
+				// state.session = null;
 				state.isAuthenticated = false;
 			});
 
@@ -286,9 +282,8 @@ const authSlice = createSlice({
 			.addCase(refreshSession.fulfilled, (state, action) => {
 				state.isLoading = false;
 				state.user = action.payload.user;
-				state.session = action.payload.session;
-				state.isAuthenticated =
-					!!action.payload.user && !!action.payload.session;
+				// state.session = action.payload.session;
+				state.isAuthenticated = true;
 			})
 			.addCase(refreshSession.rejected, (state, action) => {
 				state.isLoading = false;
@@ -303,12 +298,12 @@ const authSlice = createSlice({
 				state.isLoading = false;
 				// Only update user, keep existing session
 				if (action.payload) {
-					state.user = action.payload;
-					state.isAuthenticated = !!action.payload && !!state.session;
+					state.user = action.payload.user;
+					state.isAuthenticated = true;
 				} else {
 					// If no user returned, clear auth state
 					state.user = null;
-					state.session = null;
+
 					state.isAuthenticated = false;
 				}
 			})
@@ -317,7 +312,6 @@ const authSlice = createSlice({
 				state.error = action.payload as string;
 				// Clear auth state on verification failure
 				state.user = null;
-				state.session = null;
 				state.isAuthenticated = false;
 			});
 	},

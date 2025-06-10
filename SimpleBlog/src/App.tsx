@@ -12,6 +12,7 @@ import EditBlog from './pages/EditBlog';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import ViewBlog from './pages/ViewBlog';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 function App() {
 	return (
@@ -24,32 +25,51 @@ function App() {
 						<Route path="/signup" element={<SignUpPage />} />
 
 						{/* AUTHENTICATED ROUTES */}
+
 						<Route
 							path="/blogs"
 							element={
 								// ADD <ProtectedRoute>
-								<BlogsPage />
+								<ProtectedRoute>
+									<BlogsPage />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/blogs/edit/:id"
 							element={
-								// ADD <ProtectedRoute>
-								<EditBlog />
+								<ProtectedRoute>
+									<EditBlog />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/blogs/create"
 							element={
-								// ADD <ProtectedRoute>
-								<CreateBlog />
+								<ProtectedRoute>
+									<CreateBlog />
+								</ProtectedRoute>
 							}
 						/>
 
-						<Route path="/blogs/:id" element={<ViewBlog />} />
+						<Route
+							path="/blogs/:id"
+							element={
+								<ProtectedRoute>
+									<ViewBlog />
+								</ProtectedRoute>
+							}
+						/>
 
 						{/* Default redirect */}
-						<Route path="/" element={<Navigate to="/blogs" replace />} />
+						<Route
+							path="/"
+							element={
+								<ProtectedRoute>
+									<Navigate to="/blogs" replace />
+								</ProtectedRoute>
+							}
+						/>
 
 						{/* 404 */}
 						<Route path="*" element={<div>404: Page not found </div>} />
