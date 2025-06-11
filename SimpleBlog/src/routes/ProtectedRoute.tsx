@@ -9,9 +9,7 @@ const ProtectedRoute = ({ children }) => {
 	const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
 
 	useEffect(() => {
-		if (!isAuthenticated) {
-			dispatch(verifyUser());
-		}
+		dispatch(verifyUser());
 	}, [dispatch, isAuthenticated]);
 
 	if (isLoading) {
@@ -22,7 +20,7 @@ const ProtectedRoute = ({ children }) => {
 		);
 	}
 
-	if (!isAuthenticated) {
+	if (!isAuthenticated && !isLoading) {
 		return <Navigate to={'/signin'} replace />;
 	}
 

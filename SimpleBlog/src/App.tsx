@@ -13,6 +13,7 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import ViewBlog from './pages/ViewBlog';
 import ProtectedRoute from './routes/ProtectedRoute';
+import PublicRoute from './routes/PublicRoute';
 
 function App() {
 	return (
@@ -21,8 +22,22 @@ function App() {
 				<main className="main-content">
 					{/* PUBLIC ROUTES */}
 					<Routes>
-						<Route path="/signin" element={<SignInPage />} />
-						<Route path="/signup" element={<SignUpPage />} />
+						<Route
+							path="/signin"
+							element={
+								<PublicRoute>
+									<SignInPage />
+								</PublicRoute>
+							}
+						/>
+						<Route
+							path="/signup"
+							element={
+								<PublicRoute>
+									<SignUpPage />
+								</PublicRoute>
+							}
+						/>
 
 						{/* AUTHENTICATED ROUTES */}
 

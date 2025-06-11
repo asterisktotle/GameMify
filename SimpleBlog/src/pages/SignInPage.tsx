@@ -25,8 +25,9 @@ const SignInPage: React.FC = () => {
 	useEffect(() => {
 		return () => {
 			dispatch(clearError());
+			console.log('User authenticated: ', isAuthenticated);
 		};
-	}, [dispatch]);
+	}, [dispatch, isAuthenticated]);
 	//   useEffect(() => {
 	//     if (isAuthenticated) {
 	//       navigate("/")
