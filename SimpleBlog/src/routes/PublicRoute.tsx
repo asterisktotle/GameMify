@@ -1,32 +1,18 @@
-import React, { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../types/hookType';
-import { verifyUser } from '../store/authSlice';
-import { useNavigate } from 'react-router-dom';
-const PublicRoute = ({ children }) => {
-	const { isAuthenticated, isLoading, user } = useAppSelector(
-		(state) => state.auth
-	);
-	const dispatch = useAppDispatch();
-	const navigate = useNavigate();
+import { Navigate } from 'react-router-dom';
+import { useAppSelector } from '../store/hooks.ts';
 
-	useEffect(() => {
-		dispatch(verifyUser());
-	}, [dispatch]);
+interface PublicRouteProps {
+	children: React.ReactNode;
+}
 
-	if (isLoading) {
-		return (
-			<div className="flex justify-center items-center h-screen">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-			</div>
-		);
+const PublicRoute = ({ children }: PublicRouteProps) => {
+	const { isAuthenticated } = useAppSelector((state) => state.auth);
+
+	if (isAuthenticated) {
+		return <Navigate to="/" replace />;
 	}
 
-	if (isAuthenticated && !isLoading) {
-		navigate('/');
-	}
-	console.log('User: ', user);
-
-	return children;
+	return <>{children}</>;
 };
 
 export default PublicRoute;

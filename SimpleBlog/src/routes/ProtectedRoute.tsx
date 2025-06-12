@@ -1,32 +1,19 @@
-import { useEffect, useState } from 'react';
-
-import { useAppDispatch, useAppSelector } from '../types/hookType';
-import { verifyUser } from '../store/authSlice';
+import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAppSelector } from '../store/hooks.ts';
 
-// TODO PASS THE USERDATA AND VERIFY IF THE USE HAS THE SAME USER ID TO EDIT ITS OWN BLOG
+interface ProtectedRouteProps {
+	children: ReactNode;
+}
 
-const ProtectedRoute = ({ children }) => {
-	const dispatch = useAppDispatch();
-	const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
-	const [isVerified, setIsVerified] = useState(false);
-	useEffect(() => {
-		dispatch(verifyUser()).finally(() => setIsVerified(true));
-	}, [dispatch, isAuthenticated]);
-
-	if (isLoading || !isVerified) {
-		return (
-			<div className="flex justify-center items-center h-screen">
-				Loading...
-			</div>
-		);
-	}
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+	const { isAuthenticated } = useAppSelector((state) => state.auth);
 
 	if (!isAuthenticated) {
-		return <Navigate to={'/signin'} replace />;
+		return <Navigate to="/signin" replace />;
 	}
 
-	return children;
+	return <>{children}</>;
 };
 
 export default ProtectedRoute;

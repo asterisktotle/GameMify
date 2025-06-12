@@ -117,7 +117,10 @@ const ViewBlog: React.FC = () => {
 								</p>
 								<div className="flex items-center text-sm text-gray-500 space-x-4">
 									<time dateTime={currentBlog?.created_at}>
-										Published {formatDate(currentBlog?.created_at)}
+										Published{' '}
+										{currentBlog?.created_at
+											? formatDate(currentBlog.created_at)
+											: ''}
 									</time>
 								</div>
 							</div>
