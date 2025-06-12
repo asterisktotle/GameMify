@@ -3,7 +3,7 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hookType';
+import { useAppDispatch, useAppSelector } from '../types/hookType';
 import { IoEye, IoEyeOff } from 'react-icons/io5';
 
 import { clearError, signIn } from '../store/authSlice';

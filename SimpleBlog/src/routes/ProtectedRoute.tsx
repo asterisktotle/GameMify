@@ -1,18 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useAppDispatch, useAppSelector } from '../store/hookType';
+import { useAppDispatch, useAppSelector } from '../types/hookType';
 import { verifyUser } from '../store/authSlice';
 import { Navigate } from 'react-router-dom';
+
+// TODO PASS THE USERDATA AND VERIFY IF THE USE HAS THE SAME USER ID TO EDIT ITS OWN BLOG
 
 const ProtectedRoute = ({ children }) => {
 	const dispatch = useAppDispatch();
 	const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
-
+	const [isVerified, setIsVerified] = useState(false);
 	useEffect(() => {
-		dispatch(verifyUser());
+		dispatch(verifyUser()).finally(() => setIsVerified(true));
 	}, [dispatch, isAuthenticated]);
 
-	if (isLoading) {
+	if (isLoading || !isVerified) {
 		return (
 			<div className="flex justify-center items-center h-screen">
 				Loading...
@@ -20,7 +22,7 @@ const ProtectedRoute = ({ children }) => {
 		);
 	}
 
-	if (!isAuthenticated && !isLoading) {
+	if (!isAuthenticated) {
 		return <Navigate to={'/signin'} replace />;
 	}
 

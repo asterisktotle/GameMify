@@ -2,18 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabase-client';
 import { Link } from 'react-router-dom';
 import type { BlogTypes } from '../types/Interfaces';
+import { useAppDispatch, useAppSelector } from '../types/hookType';
 
 const BlogsPage = () => {
 	const [blogs, setBlogs] = useState<BlogTypes[]>([]);
-	const [isAuthenticated, setIsAuthenticated] = useState(true);
+	// const [isAuthenticated, setIsAuthenticated] = useState(true);
+	// const [userProfile, setUserProfile] = useState({});
+	const [errorMessage, setErrorMessage] = useState('');
+
+	const userProfile = useAppSelector((state) => state.auth.user);
 
 	const fetchBlogs = async () => {
 		const { error, data } = await supabase.from('Blogs').select('*');
 
 		if (error) {
-			console.log('Error fetching data: ', error.message);
+			setErrorMessage(error.message);
+			return;
 		} else {
 			setBlogs(data);
+
+			return;
 		}
 	};
 
@@ -29,11 +37,17 @@ const BlogsPage = () => {
 
 	useEffect(() => {
 		fetchBlogs();
-	}, [blogs]);
+		console.log(userProfile);
+	}, []);
 
 	return (
 		<div className="px-4 sm:px-6 lg:px-8">
 			<div className="sm:flex sm:items-center">
+				{errorMessage && (
+					<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+						{errorMessage}
+					</div>
+				)}
 				<div className="sm:flex-auto">
 					<h1 className="text-2xl font-semibold text-gray-900">All Blogs</h1>
 					<p className="mt-2 text-sm text-gray-700">
@@ -41,9 +55,8 @@ const BlogsPage = () => {
 						date.
 					</p>
 				</div>
-				{isAuthenticated && (
+				{userProfile?.user_metadata.email_verified && (
 					<div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-						{/* Remove p to Link  */}
 						<Link
 							to="/blogs/create"
 							className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
@@ -77,15 +90,18 @@ const BlogsPage = () => {
 									<p>By {post.author}</p>
 									<p>{new Date(post.created_at).toLocaleDateString()}</p>
 								</div>
-								{isAuthenticated && (
+								{userProfile?.user_metadata.email_verified && (
 									<div className="flex space-x-2">
-										<Link
-											to={`/blogs/edit/${post.id}`}
-											state={{ currentBlog: post }}
-											className="text-blue-600 hover:text-blue-900"
-										>
-											Edit
-										</Link>
+										{userProfile.id === post.author_id && (
+											<Link
+												to={`/blogs/edit/${post.id}`}
+												state={{ currentBlog: post }}
+												className="text-blue-600 hover:text-blue-900"
+											>
+												Edit
+											</Link>
+										)}
+
 										<button
 											onClick={() => handleDelete(post.id)}
 											className="text-red-600 hover:text-red-900"

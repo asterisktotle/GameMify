@@ -197,7 +197,7 @@ const authSlice = createSlice({
 		) => {
 			state.user = action.payload.user;
 			// state.session = action.payload.session;
-			state.isAuthenticated = !!action.payload.user && !!action.payload.session;
+			state.isAuthenticated = !!action.payload.user;
 		},
 		clearAuth: (state) => {
 			state.user = null;

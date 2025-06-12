@@ -1,13 +1,14 @@
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 export interface BlogTypes {
-	id: number;
+	id: number | null;
 	title: string;
 	content: string;
 	excerpt: string;
 	author: string;
-	created_at: string;
-	updated_at?: string;
+	author_id: string;
+	email: string;
+	is_published: boolean;
 }
 
 export interface User {

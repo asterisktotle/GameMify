@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hookType';
+import { useAppDispatch, useAppSelector } from '../types/hookType';
 import { verifyUser } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
 const PublicRoute = ({ children }) => {
-	const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+	const { isAuthenticated, isLoading, user } = useAppSelector(
+		(state) => state.auth
+	);
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 
@@ -22,6 +24,7 @@ const PublicRoute = ({ children }) => {
 	if (isAuthenticated && !isLoading) {
 		navigate('/');
 	}
+	console.log('User: ', user);
 
 	return children;
 };

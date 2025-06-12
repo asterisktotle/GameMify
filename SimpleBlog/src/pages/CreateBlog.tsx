@@ -1,47 +1,51 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabase-client';
-import { useNavigate } from 'react-router-dom';
+import { data, useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../types/hookType';
 
 interface BlogFormData {
 	title: string;
 	content: string;
 	excerpt: string;
-	published: boolean;
+	is_published: boolean;
+	author: string;
+	email: string;
 }
-
 const CreateBlog = () => {
 	const [blogFormData, setBlogFormData] = useState<BlogFormData>({
 		title: '',
 		content: '',
 		excerpt: '',
-		published: false,
+		is_published: false,
+		author: '',
+		email: '',
 	});
 	const [isLoading, setIsLoading] = useState(false);
+	const [errorMessage, setErrorMessage] = useState('');
+	const [published, setPublished] = useState(false);
 	const navigate = useNavigate();
+
+	const userProfile = useAppSelector((state) => state.auth.user);
+
+	useEffect(() => {
+		if (!userProfile?.user_metadata.email_verified) {
+			setErrorMessage('User is not authenticated.');
+		}
+	}, [userProfile]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
 
-		// TODO: create getUser authentication login and signup
-
-		// const {
-		// 	data: { user },
-		// } = await supabase.auth.getUser();
-
-		// if (!user) {
-		// 	console.log('User is not authenticated');
-		// 	setIsLoading(false);
-		// 	return;
-		// }
-
 		const newBlogData = {
 			title: blogFormData.title,
 			content: blogFormData.content,
 			excerpt: blogFormData.excerpt,
-			published: true,
-			// author_id: userId,
+			is_published: published,
+			author: userProfile?.user_metadata.username,
+			author_id: userProfile?.id,
+			email: userProfile?.email,
 		};
 
 		const { data, error } = await supabase
@@ -56,6 +60,7 @@ const CreateBlog = () => {
 				error.message,
 				error.details
 			);
+			setErrorMessage('Upload failed:' + error.message);
 			setIsLoading(false);
 		} else {
 			console.log('Blog created successfully', data);
@@ -63,8 +68,11 @@ const CreateBlog = () => {
 				title: '',
 				content: '',
 				excerpt: '',
-				published: false,
+				is_published: false,
+				author: '',
+				email: '',
 			});
+			setErrorMessage('');
 		}
 
 		setIsLoading(false);
@@ -90,7 +98,11 @@ const CreateBlog = () => {
 				</div>
 
 				<form onSubmit={handleSubmit} className="mt-8 space-y-6">
-					{/* {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>} */}
+					{errorMessage && (
+						<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+							{errorMessage}
+						</div>
+					)}
 
 					<div>
 						<label
@@ -155,6 +167,15 @@ const CreateBlog = () => {
 							className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 						>
 							Cancel
+						</button>
+
+						<button
+							onClick={() => setPublished((prev) => !prev)}
+							className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${
+								published ? 'bg-green-600' : 'bg-gray-500'
+							}  hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+						>
+							{published ? 'Publish' : 'Draft'}
 						</button>
 						<button
 							type="submit"
