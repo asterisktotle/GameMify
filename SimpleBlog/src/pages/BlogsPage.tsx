@@ -7,14 +7,16 @@ import ReactPaginate from 'react-paginate';
 
 const BlogsPage = () => {
 	const [blogs, setBlogs] = useState<BlogTypes[]>([]);
-	const [errorMessage, setErrorMessage] = useState('');
 	const [toggleDrafts, setToggleDrafts] = useState(false);
 	const [itemOffset, setItemOffset] = useState(0);
-	const itemsPerPage = 2;
+	const [isLoading, setIsLoading] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const itemsPerPage = 6;
 
 	const userProfile = useAppSelector((state) => state.auth.user);
 
 	const fetchBlogs = async () => {
+		setIsLoading(true);
 		const { error, data } = await supabase.from('Blogs').select('*');
 
 		if (error) {
@@ -22,7 +24,7 @@ const BlogsPage = () => {
 			return;
 		} else {
 			setBlogs(data);
-			console.log('blogs :', data);
+			setIsLoading(false);
 			return;
 		}
 	};
@@ -37,8 +39,6 @@ const BlogsPage = () => {
 		fetchBlogs();
 	}, []);
 
-	console.log('filtered blogs is array: ', Array.isArray(filteredBlogs));
-
 	const handleDelete = async (id: number) => {
 		const { error } = await supabase.from('Blogs').delete().eq('id', id);
 
@@ -49,8 +49,8 @@ const BlogsPage = () => {
 		}
 	};
 
+	// FROM react-pagination documentation
 	const endOffset = itemOffset + itemsPerPage;
-	console.log(`Loading items from ${itemOffset} to ${endOffset}`);
 	const currentItems = filteredBlogs.slice(itemOffset, endOffset);
 	const pageCount = Math.ceil(filteredBlogs.length / itemsPerPage);
 
@@ -61,6 +61,14 @@ const BlogsPage = () => {
 		);
 		setItemOffset(newOffset);
 	};
+
+	if (isLoading) {
+		return (
+			<div className="flex justify-center items-center h-64">
+				<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="px-4 sm:px-6 lg:px-8">

@@ -5,10 +5,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabase-client';
 import { useAppSelector } from '../types/hookType';
-// import { useAppDispatch, useAppSelector } from "../hooks/redux"
-// import { fetchBlogById, updateBlog, clearCurrentBlog } from "../store/blogSlice"
-
-// import { BlogTypes } from '../types/Interfaces';
 
 const EditBlog: React.FC = () => {
 	const userProfile = useAppSelector((state) => state.auth.user);
@@ -22,11 +18,8 @@ const EditBlog: React.FC = () => {
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [updating, setUpdating] = useState(false);
-	const [errorField, setErrorField] = useState({
-		title: false,
-		content: false,
-		excerpt: false,
-	});
+
+	const [fetchError, setFetchError] = useState<string | null>(null);
 
 	const location = useLocation();
 	const { id } = useParams(); // get the dynamic parameter
@@ -48,8 +41,12 @@ const EditBlog: React.FC = () => {
 
 			return existingBlog;
 		} catch (error) {
-			console.error('Unexpected error: ', error);
-			return null;
+			if (error instanceof Error) {
+				setFetchError('Unexpected error: ' + error.message);
+			} else {
+				setFetchError(String(error));
+				console.log('Unknown error:', error);
+			}
 		}
 	};
 
@@ -70,7 +67,7 @@ const EditBlog: React.FC = () => {
 						content: blogContent.content,
 					});
 					setIsLoading(false);
-					console.log('location state triggered: ', location.state.currentBlog);
+
 					return;
 				}
 
@@ -83,38 +80,22 @@ const EditBlog: React.FC = () => {
 							excerpt: blogData.excerpt,
 							content: blogData.content,
 						});
-
-						console.log('location state did not triggered');
 					}
 					setIsLoading(false);
 				}
 			} catch (error) {
-				console.log('error: ', error);
+				if (error instanceof Error) {
+					console.log('Unexpected error: ', error.message);
+					setFetchError(error.message);
+				} else {
+					console.log('Unexpected error: ' + error);
+					setFetchError(String(error));
+				}
 			}
 		};
 
 		loadBlogContent();
-	}, [id, location.state]);
-
-	//   useEffect(() => {
-	//     if (id) {
-	//       dispatch(fetchBlogById(id))
-	//     }
-	//     return () => {
-	//       dispatch(clearCurrentBlog())
-	//     }
-	//   }, [dispatch, id])
-
-	//   useEffect(() => {
-	//     if (currentBlog) {
-	//       setFormData({
-	//         title: currentBlog.title,
-	//         content: currentBlog.content,
-	//         excerpt: currentBlog.excerpt,
-	//         tags: currentBlog.tags.join(", "),
-	//       })
-	//     }
-	//   }, [currentBlog])
+	}, [id, location.state, navigate, userProfile]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -128,30 +109,8 @@ const EditBlog: React.FC = () => {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		//VALIDATING UPDATED FIELDS
-		const { title, content, excerpt } = blogForm;
-
-		if (!title.trim()) {
-			setErrorField((prev) => ({ ...prev, title: true }));
-			return;
-		}
-		if (!content.trim()) {
-			setErrorField((prev) => ({ ...prev, content: true }));
-			return;
-		}
-		if (!excerpt.trim()) {
-			setErrorField((prev) => ({ ...prev, excerpt: true }));
-			return;
-		}
-
 		try {
 			setUpdating(true);
-			// CLEANING	ERRORS
-			setErrorField({
-				title: false,
-				content: false,
-				excerpt: false,
-			});
 
 			const { error } = await supabase
 				.from('Blogs')
@@ -166,7 +125,8 @@ const EditBlog: React.FC = () => {
 
 			if (error) {
 				console.error('Error updating blog: ', error.message);
-				return;
+				setFetchError(error.message);
+				return null;
 			}
 		} catch (error) {
 			console.error('Unexpected error in updating: ', error);
@@ -174,6 +134,8 @@ const EditBlog: React.FC = () => {
 			setUpdating(false);
 			navigate('/');
 		}
+
+		console.log('Submitted values: ', blogForm.excerpt);
 	};
 
 	if (isLoading) {
@@ -200,17 +162,21 @@ const EditBlog: React.FC = () => {
 		);
 	}
 
-	//   if (error) {
-	//     return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>
-	//   }
+	if (fetchError) {
+		return (
+			<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded ">
+				{fetchError}
+			</div>
+		);
+	}
 
-	//   if (!currentBlog) {
-	//     return (
-	//       <div className="text-center">
-	//         <p className="text-gray-500">Blog not found</p>
-	//       </div>
-	//     )
-	//   }
+	if (!blogForm) {
+		return (
+			<div className="flex items-center justify-center h-screen text-center">
+				<p className="text-gray-500 text-lg md:text-xl">Blog not found</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="px-4 sm:px-6 lg:px-8">
@@ -233,9 +199,7 @@ const EditBlog: React.FC = () => {
 						>
 							Title
 						</label>
-						{errorField.title && (
-							<p className="text-red-400 text-sm">*Enter a title</p>
-						)}
+
 						<input
 							type="text"
 							name="title"
@@ -255,9 +219,7 @@ const EditBlog: React.FC = () => {
 						>
 							Excerpt
 						</label>
-						{errorField.excerpt && (
-							<p className="text-red-400 text-sm">*Enter an excerpt</p>
-						)}
+
 						<textarea
 							name="excerpt"
 							id="excerpt"
@@ -278,9 +240,6 @@ const EditBlog: React.FC = () => {
 							Content
 						</label>
 
-						{errorField.content && (
-							<p className="text-red-400 text-sm">*Enter a content</p>
-						)}
 						<textarea
 							name="content"
 							id="content"

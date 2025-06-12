@@ -4,24 +4,19 @@ import type { BlogTypes } from '../types/Interfaces';
 import { supabase } from '../supabase-client';
 import { FaArrowLeft, FaRegEdit } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
+import formatDate from '../utils/formatDate';
+import { useAppSelector } from '../types/hookType';
+
 const ViewBlog: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 	const location = useLocation();
 	const navigate = useNavigate();
 
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-		});
-	};
-
 	const [currentBlog, setCurrentBlog] = useState<BlogTypes | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isError, setIsError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState(false);
+
+	const userProfile = useAppSelector((state) => state.auth.user);
 
 	const handleDelete = async (id: number) => {
 		const { error } = await supabase.from('Blogs').delete().eq('id', id);
@@ -33,8 +28,6 @@ const ViewBlog: React.FC = () => {
 			setTimeout(() => navigate('/'), 3000);
 		}
 	};
-
-	const [isAuthenticated, setIsAuthenticated] = useState(true);
 
 	useEffect(() => {
 		const loadBlogContent = async () => {
@@ -57,7 +50,7 @@ const ViewBlog: React.FC = () => {
 
 					if (fetchError) {
 						console.error('Error fetching blogs: ', fetchError.message);
-						setIsError(true);
+						setErrorMessage(true);
 						return;
 					} else {
 						setCurrentBlog(blogData);
@@ -65,7 +58,7 @@ const ViewBlog: React.FC = () => {
 				}
 			} catch (error) {
 				console.error('Unexpected error fetching: ', error);
-				setIsError(true);
+				setErrorMessage(true);
 			} finally {
 				setIsLoading(false);
 			}
@@ -74,10 +67,19 @@ const ViewBlog: React.FC = () => {
 		loadBlogContent();
 	}, [id, location.state]);
 
+	if (isLoading) {
+		return (
+			<div className="flex justify-center items-center h-64">
+				<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="px-4 sm:px-6 lg:px-8">
 			<div className="max-w-4xl mx-auto">
 				{/* Navigation */}
+
 				<nav className="my-3">
 					<Link
 						to="/"
@@ -87,6 +89,12 @@ const ViewBlog: React.FC = () => {
 						Back to all blogs
 					</Link>
 				</nav>
+
+				{errorMessage && (
+					<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+						{errorMessage}
+					</div>
+				)}
 
 				{/* Blog Header */}
 				<header className="mb-8">
@@ -111,17 +119,12 @@ const ViewBlog: React.FC = () => {
 									<time dateTime={currentBlog?.created_at}>
 										Published {formatDate(currentBlog?.created_at)}
 									</time>
-									{currentBlog?.updated_at !== currentBlog?.created_at && (
-										<time dateTime={currentBlog?.updated_at}>
-											Updated {formatDate(currentBlog?.updated_at)}
-										</time>
-									)}
 								</div>
 							</div>
 						</div>
 
-						{/* Action buttons for authenticated users */}
-						{isAuthenticated && (
+						{/* Action buttons for the author */}
+						{userProfile?.id === currentBlog?.author_id && (
 							<div className="flex items-center space-x-3">
 								<Link
 									to={`/blogs/edit/${currentBlog?.id}`}
@@ -155,29 +158,6 @@ const ViewBlog: React.FC = () => {
 						{currentBlog?.content}
 					</div>
 				</article>
-
-				{/* Related Actions */}
-				{/* <div className="mt-8 bg-gray-50 rounded-lg p-6">
-					<h3 className="text-lg font-medium text-gray-900 mb-4">
-						What's next?
-					</h3>
-					<div className="flex flex-wrap gap-4">
-						<Link
-							to="/"
-							className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
-						>
-							Browse more posts
-						</Link>
-						{isAuthenticated && (
-							<Link
-								to="/create"
-								className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200"
-							>
-								Write a new post
-							</Link>
-						)}
-					</div>
-				</div> */}
 			</div>
 		</div>
 	);
