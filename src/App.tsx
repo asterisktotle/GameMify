@@ -6,6 +6,9 @@ import {
 } from 'react-router-dom';
 import './App.css';
 import BlogsPage from './pages/BlogsPage';
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from './store/hooks';
+import { checkAuth } from './store/authSlice';
 
 import CreateBlog from './pages/CreateBlog';
 import EditBlog from './pages/EditBlog';
@@ -16,12 +19,21 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import PublicRoute from './routes/PublicRoute';
 
 function App() {
+	const dispatch = useAppDispatch();
+	const { isAuthenticated } = useAppSelector((state) => state.auth);
+
+	useEffect(() => {
+		dispatch(checkAuth());
+	}, [dispatch]);
+
+	console.log('Current auth state:', isAuthenticated); // Debug log
+
 	return (
 		<>
 			<Router>
 				<main className="main-content">
-					{/* PUBLIC ROUTES */}
 					<Routes>
+						{/* Public Routes */}
 						<Route
 							path="/signin"
 							element={
@@ -39,12 +51,10 @@ function App() {
 							}
 						/>
 
-						{/* AUTHENTICATED ROUTES */}
-
+						{/* Protected Routes */}
 						<Route
 							path="/blogs"
 							element={
-								// ADD <ProtectedRoute>
 								<ProtectedRoute>
 									<BlogsPage />
 								</ProtectedRoute>
@@ -66,7 +76,6 @@ function App() {
 								</ProtectedRoute>
 							}
 						/>
-
 						<Route
 							path="/blogs/:id"
 							element={
@@ -86,8 +95,8 @@ function App() {
 							}
 						/>
 
-						{/* 404 */}
-						<Route path="*" element={<div>404: Page not found </div>} />
+						{/* 404 - Must be last */}
+						<Route path="*" element={<Navigate to="/signin" replace />} />
 					</Routes>
 				</main>
 			</Router>
