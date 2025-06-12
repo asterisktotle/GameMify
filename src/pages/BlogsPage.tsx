@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabase-client';
 import { Link } from 'react-router-dom';
 import type { BlogTypes } from '../types/Interfaces';
-import { useAppSelector } from '../types/hookType';
+import { useAppSelector, useAppDispatch } from '../types/hookType';
 import ReactPaginate from 'react-paginate';
+import { useNavigate } from 'react-router-dom';
+import { signOut } from '../store/authSlice';
 
 const BlogsPage = () => {
 	const [blogs, setBlogs] = useState<BlogTypes[]>([]);
@@ -12,6 +14,8 @@ const BlogsPage = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const itemsPerPage = 6;
+	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
 
 	const userProfile = useAppSelector((state) => state.auth.user);
 
@@ -46,6 +50,16 @@ const BlogsPage = () => {
 			console.log('cannot delete: ', error.message);
 		} else {
 			setBlogs((prev) => prev.filter((blog) => blog.id !== id));
+		}
+	};
+
+	const handleSignOut = async () => {
+		const { error } = await supabase.auth.signOut();
+		if (error) {
+			console.log('cannot sign out: ', error.message);
+		} else {
+			dispatch(signOut());
+			navigate('/signin');
 		}
 	};
 
@@ -87,10 +101,10 @@ const BlogsPage = () => {
 				</div>
 				{userProfile?.user_metadata.email_verified && (
 					<>
-						<div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+						<div className="mt-4 sm:mt-0 md:flex gap-2 sm:ml-16 sm:flex-none">
 							<button
 								onClick={() => setToggleDrafts((prev) => !prev)}
-								className={`inline-flex mr-2 items-center justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 ${
+								className={`inline-flex  items-center justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 ${
 									toggleDrafts ? 'bg-gray-600' : 'bg-gray-400'
 								} `}
 							>
@@ -102,6 +116,12 @@ const BlogsPage = () => {
 							>
 								Create New Blog
 							</Link>
+							<button
+								onClick={() => handleSignOut()}
+								className="inline-flex items-center justify-center rounded-md border  border-transparent  px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 bg-red-400"
+							>
+								Sign Out
+							</button>
 						</div>
 					</>
 				)}
