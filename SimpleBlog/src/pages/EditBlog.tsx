@@ -4,17 +4,15 @@ import type React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabase-client';
+import { useAppSelector } from '../types/hookType';
 // import { useAppDispatch, useAppSelector } from "../hooks/redux"
 // import { fetchBlogById, updateBlog, clearCurrentBlog } from "../store/blogSlice"
 
 // import { BlogTypes } from '../types/Interfaces';
 
 const EditBlog: React.FC = () => {
-	// const { id } = useParams<{ id: string }>();
-	//   const dispatch = useAppDispatch()
-	// const navigate = useNavigate();
-	//   const { currentBlog, isLoading, error } = useAppSelector((state) => state.blogs)
-	// DELETE THIS WHEN REFACTORING
+	const userProfile = useAppSelector((state) => state.auth.user);
+	const navigate = useNavigate();
 
 	const [blogForm, setBlogForm] = useState({
 		title: '',
@@ -30,7 +28,6 @@ const EditBlog: React.FC = () => {
 		excerpt: false,
 	});
 
-	const navigate = useNavigate();
 	const location = useLocation();
 	const { id } = useParams(); // get the dynamic parameter
 
@@ -47,6 +44,8 @@ const EditBlog: React.FC = () => {
 				return null;
 			}
 
+			console.log(existingBlog);
+
 			return existingBlog;
 		} catch (error) {
 			console.error('Unexpected error: ', error);
@@ -56,32 +55,41 @@ const EditBlog: React.FC = () => {
 
 	useEffect(() => {
 		const loadBlogContent = async () => {
-			const blogContent = location.state?.currentBlog;
+			try {
+				const blogContent = location.state?.currentBlog;
 
-			if (blogContent && blogContent.id == id) {
-				setBlogForm({
-					title: blogContent.title,
-					excerpt: blogContent.excerpt,
-					content: blogContent.content,
-				});
-				setIsLoading(false);
-				console.log('location state triggered: ', location.state.currentBlog);
-				return;
-			}
-
-			//fallback: fetching data
-			if (id) {
-				const blogData = await fetchBlog(id);
-				if (blogData) {
-					setBlogForm({
-						title: blogData.title,
-						excerpt: blogData.excerpt,
-						content: blogData.content,
-					});
-
-					console.log('location state did not triggered');
+				//IF OTHER USER TRIED TO EDIT OTHER BLOGS, REDIRECT TO HOME PAGE
+				if (blogContent?.author_id !== userProfile?.id) {
+					navigate('/');
 				}
-				setIsLoading(false);
+
+				if (blogContent && blogContent.id == id) {
+					setBlogForm({
+						title: blogContent.title,
+						excerpt: blogContent.excerpt,
+						content: blogContent.content,
+					});
+					setIsLoading(false);
+					console.log('location state triggered: ', location.state.currentBlog);
+					return;
+				}
+
+				//fallback: fetching data
+				if (id) {
+					const blogData = await fetchBlog(id);
+					if (blogData) {
+						setBlogForm({
+							title: blogData.title,
+							excerpt: blogData.excerpt,
+							content: blogData.content,
+						});
+
+						console.log('location state did not triggered');
+					}
+					setIsLoading(false);
+				}
+			} catch (error) {
+				console.log('error: ', error);
 			}
 		};
 
