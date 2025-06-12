@@ -30,7 +30,7 @@ function App() {
 
 	return (
 		<>
-			<Router>
+			<Router basename="/GameMify">
 				<main className="main-content">
 					<Routes>
 						{/* Public Routes */}
