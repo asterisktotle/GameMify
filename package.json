@@ -1,6 +1,7 @@
 {
 	"name": "simpleblog",
-	"private": true,
+	"private": false,
+	"homepage": "https://asterisktotle.github.io/GameMify/",
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
