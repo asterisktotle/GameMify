@@ -3,7 +3,7 @@
 A modern blog application built with React, TypeScript, Redux Toolkit, and Supabase. This project demonstrates a full-stack blog implementation with features like authentication, blog post management, and responsive design.
 
 ## Deployed Site
-https://asterisktotle.github.io/GameMify/signin
+https://asterisktotle.github.io/GameMify/
 
 ## 🚀 Features
 
